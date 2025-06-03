@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import UploadPage from './pages/UploadPage';
 import MyDocuments from './pages/MyDocuments';
 import Login from './pages/Login';
-import Register from './pages/Register';
+import AuthSuccess from './pages/AuthSuccess';
 
 // Reusable auth-protected route wrapper
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -13,8 +13,8 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
 function App() {
   return (
     <Routes>
+      <Route path="/auth-success" element={<AuthSuccess />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
       <Route
         path="/upload"
         element={
