@@ -1,21 +1,28 @@
-import jwt_decode from 'jwt-decode';
+import passport from 'passport';
+import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
 
-interface DecodedToken {
-  userId: string;
-  exp: number;
-  iat: number;
-}
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      callbackURL: '/auth/google/callback',
+    },
+    async (
+      accessToken: string,
+      refreshToken: string,
+      profile: Profile,
+      done: (error: any, user?: any) => void
+    ) => {
+      // your user logic
+    }
+  )
+);
 
- export const getUserFromToken = () => {
-  const token = localStorage.getItem('token');
-  if (!token) return null;
+passport.serializeUser((user: any, done) => {
+  done(null, user);
+});
 
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload; // { id, email, ... }
-  } catch (err) {
-    console.error("Invalid token", err);
-    return null;
-  }
-};
-
+passport.deserializeUser((user: any, done) => {
+  done(null, user as Express.User);
+});
