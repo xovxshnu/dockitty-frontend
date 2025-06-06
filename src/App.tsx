@@ -4,7 +4,6 @@ import MyDocuments from './pages/MyDocuments';
 import Login from './pages/Login';
 import AuthSuccess from './pages/AuthSuccess';
 
-// Reusable auth-protected route wrapper
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const isAuthenticated = !!localStorage.getItem('token');
   return isAuthenticated ? children : <Navigate to="/login" />;
