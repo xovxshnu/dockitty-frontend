@@ -1,17 +1,20 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const AuthSuccess = () => {
+const AuthSuccess: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token');
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
 
     if (token) {
+      // Store the JWT in localStorage so your other pages can use it:
       localStorage.setItem('token', token);
-      navigate('/upload'); // Redirect to your main app page
+      // Redirect to the upload page (or wherever you want):
+      navigate('/upload');
     } else {
+      // If no token, send back to login
       navigate('/login');
     }
   }, [navigate]);
