@@ -1,18 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import { getUserFromToken } from '../utils/auth';
+import { jwtDecode } from 'jwt-decode';
+
 
 const API = import.meta.env.VITE_API_URL;
 
 const MyDocuments = () => {
   const [docs, setDocs] = useState([]);
-  const user = getUserFromToken();
+
+  const token = localStorage.getItem('token');
+  let userId: string | null = null;
+
+  if (token) {
+    try {
+      const decoded: any = jwt_decode(token);
+      userId = decoded.userId;
+    } catch (e) {
+      console.error('Failed to decode token:', e);
+    }
+  }
 
   useEffect(() => {
     const fetchDocs = async () => {
       try {
-        const res = await fetch(`${API}/api/documents?userId=${user?.userId}`, {
+        const res = await fetch(`${API}/api/documents?userId=${userId}`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            Authorization: `Bearer ${token}`,
           },
         });
         const data = await res.json();
@@ -22,8 +34,8 @@ const MyDocuments = () => {
       }
     };
 
-    if (user?.userId) fetchDocs();
-  }, [user?.userId]);
+    if (userId) fetchDocs();
+  }, [userId]);
 
   return (
     <div className="flex h-screen">
@@ -31,7 +43,7 @@ const MyDocuments = () => {
       <aside className="w-64 bg-gray-100 p-6 border-r">
         <h1 className="text-2xl font-bold mb-6">📄 Dockitty</h1>
         <nav>
-          <a href="/" className="block mb-2 text-indigo-600 font-medium">Upload</a>
+          <a href="/upload" className="block mb-2 text-indigo-600 font-medium">Upload</a>
           <a href="/docs" className="block text-gray-700 hover:text-indigo-500">My Documents</a>
           <button
             onClick={() => {

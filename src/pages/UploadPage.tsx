@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getUserFromToken } from '../utils/auth';
+import { jwtDecode } from 'jwt-decode';
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -7,23 +7,32 @@ const UploadPage = () => {
   const [file, setFile] = useState<File | null>(null);
   const [message, setMessage] = useState('');
   const [correctedText, setCorrectedText] = useState('');
-  const user = getUserFromToken();
+
+  const token = localStorage.getItem('token');
+  let userId: string | null = null;
+
+  if (token) {
+    try {
+      const decoded: any = jwtDecode(token);
+      userId = decoded.userId;
+    } catch (err) {
+      console.error('Invalid token', err);
+    }
+  }
+
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file || !userId) return;
 
     const formData = new FormData();
     formData.append('document', file);
-
-    if (user) {
-      formData.append('userId', user.userId); // Use actual userId from token
-    }
+    formData.append('userId', userId);
 
     try {
       const res = await fetch(`${API}/api/documents`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`,
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
