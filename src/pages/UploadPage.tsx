@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { jwtDecode } from 'jwt-decode';
+import {jwtDecode} from 'jwt-decode';
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -20,9 +20,11 @@ const UploadPage = () => {
     }
   }
 
-
   const handleUpload = async () => {
-    if (!file || !userId) return;
+    if (!file || !userId || !token) {
+      setMessage('❌ Missing file or token');
+      return;
+    }
 
     const formData = new FormData();
     formData.append('document', file);
