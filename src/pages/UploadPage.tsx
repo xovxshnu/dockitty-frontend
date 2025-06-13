@@ -1,28 +1,44 @@
-import React, { useState } from 'react';
-import {jwtDecode} from 'jwt-decode';
+import React, { useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
 
-const API = import.meta.env.VITE_API_URL;
+interface DecodedToken {
+  userId: string;
+  [key: string]: any;
+}
 
-const UploadPage = () => {
+const API = import.meta.env.VITE_API_URL || 'http://localhost:3000'; // fallback for dev
+
+const UploadPage: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [message, setMessage] = useState('');
   const [correctedText, setCorrectedText] = useState('');
+  const [userId, setUserId] = useState<string | null>(null);
+  const [tokenAvailable, setTokenAvailable] = useState(false);
 
-  const token = localStorage.getItem('token');
-  let userId: string | null = null;
-
-  if (token) {
-    try {
-      const decoded: any = jwtDecode(token);
-      userId = decoded.userId;
-    } catch (err) {
-      console.error('Invalid token', err);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode<DecodedToken>(token);
+        if (decoded.userId) {
+          setUserId(decoded.userId);
+          setTokenAvailable(true);
+        } else {
+          throw new Error('userId not found in token');
+        }
+      } catch (err) {
+        console.error('Invalid token', err);
+        setMessage('❌ Invalid or expired session, please login again.');
+        localStorage.removeItem('token');
+      }
     }
-  }
+  }, []);
 
   const handleUpload = async () => {
+    const token = localStorage.getItem('token');
+
     if (!file || !userId || !token) {
-      setMessage('❌ Missing file or token');
+      setMessage('❌ Missing file or session. Please login again.');
       return;
     }
 
@@ -49,7 +65,7 @@ const UploadPage = () => {
       setMessage('✅ File uploaded and corrected successfully!');
     } catch (err) {
       console.error(err);
-      setMessage('❌ Upload failed');
+      setMessage('❌ Upload failed. Check console for details.');
     }
   };
 
@@ -69,8 +85,8 @@ const UploadPage = () => {
       <aside className="w-64 bg-gray-100 p-6 border-r">
         <h1 className="text-2xl font-bold mb-6">📄 Dockitty</h1>
         <nav>
-          <a href="/" className="block mb-2 text-indigo-600 font-medium">Upload</a>
-          <a href="/docs" className="block text-gray-700 hover:text-indigo-500">My Documents</a>
+          <a href="/upload" className="block mb-2 text-indigo-600 font-medium">Upload</a>
+          <a href="/my-documents" className="block text-gray-700 hover:text-indigo-500">My Documents</a>
           <button
             onClick={() => {
               localStorage.removeItem('token');
@@ -87,30 +103,36 @@ const UploadPage = () => {
       <main className="flex-1 p-10 bg-white overflow-auto">
         <h2 className="text-3xl font-bold mb-6">Upload Document</h2>
 
-        <input
-          type="file"
-          accept=".txt,.pdf,.docx"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          className="mb-4"
-        />
+        {!tokenAvailable ? (
+          <p className="text-red-600">⚠️ You must be logged in to upload documents.</p>
+        ) : (
+          <>
+            <input
+              type="file"
+              accept=".txt,.pdf,.docx"
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              className="mb-4"
+            />
 
-        <div className="flex gap-4 items-center">
-          <button
-            onClick={handleUpload}
-            className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
-          >
-            Upload
-          </button>
+            <div className="flex gap-4 items-center">
+              <button
+                onClick={handleUpload}
+                className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+              >
+                Upload
+              </button>
 
-          {correctedText && (
-            <button
-              onClick={handleDownload}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-            >
-              Download
-            </button>
-          )}
-        </div>
+              {correctedText && (
+                <button
+                  onClick={handleDownload}
+                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                >
+                  Download
+                </button>
+              )}
+            </div>
+          </>
+        )}
 
         {message && <p className="mt-4 text-sm text-gray-800">{message}</p>}
 
