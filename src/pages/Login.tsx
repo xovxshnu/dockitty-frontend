@@ -1,7 +1,7 @@
-// import { useEffect } from "react";
+// import { useEffect } from "react"; 
 // import { useNavigate } from "react-router-dom";
 
-// const LoginPage = () => {
+const Login = () => {
 //   const navigate = useNavigate();
 
 //   useEffect(() => {
@@ -18,12 +18,12 @@
 //     window.location.href = "https://dockitty-backend-production.up.railway.app/api/auth/google";
 //   };
 
-//   return (
-//     <div>
-//       <h1>Login to Dockitty</h1>
-//       <button onClick={handleGoogleLogin}>Sign in with Google</button>
-//     </div>
-//   );
-// };
+  return (
+    <div>
+      <h1>Login to Dockitty</h1>
+      {/* <button onClick={handleGoogleLogin}>Sign in with Google</button> */}
+    </div>
+  );
+};
 
-// export default LoginPage;
+export default Login;
